@@ -1,5 +1,5 @@
 // src/index.ts
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -12,8 +12,8 @@ app.use(cors());
 app.use(express.json());
 
 // Health-check route
-app.get('/health', (req: Request, res: Response) => {
-  return res.status(200).send('OK');
+app.get('/health', (_req, res) => {
+  res.status(200).send('OK');
 });
 
 // Start
