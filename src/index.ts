@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import boardRoutes from './routes/boards';
+import projectRoutes from './routes/projects';
 dotenv.config();
 
 const app = express();
@@ -22,6 +23,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 app.use(cors());
 app.use(express.json());
 app.use(boardRoutes);
+app.use(projectRoutes);
 
 // Register new user
 app.post('/auth/register', async (req, res) => {

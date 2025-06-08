@@ -41,3 +41,24 @@ model User {
 
   @@unique([accountId, username])
 }
+
+model ProjectCategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  account   Account  @relation(fields: [accountId], references: [id])
+  accountId Int
+  createdAt DateTime @default(now())
+
+  projects  Project[]
+}
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  name      String
+  account   Account  @relation(fields: [accountId], references: [id])
+  accountId Int
+  createdAt DateTime @default(now())
+
+  category   ProjectCategory? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+}
