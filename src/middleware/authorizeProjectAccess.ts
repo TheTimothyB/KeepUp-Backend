@@ -28,6 +28,10 @@ export function authorizeProjectAccess(projectIdParamKey: string) {
         return;
       }
       const projectId = Number(req.params[projectIdParamKey]);
+      if (Number.isNaN(projectId)) {
+        res.status(400).json({ error: 'Invalid project ID' });
+        return;
+      }
       if (
         userProjectAccess.some(
           (a) => a.userId === userId && a.projectId === projectId
