@@ -9,6 +9,8 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   assignedUserIds: number[];
+  progress: number;
+  tagIds: number[];
 }
 
 export const tasks: Task[] = [];
