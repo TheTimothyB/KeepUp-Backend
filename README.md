@@ -109,3 +109,31 @@ following endpoints to manage them:
 When creating a project via `POST /projects`, omit `categoryId` to automatically
 place it in the `Uncategorized` group for its account.
 
+
+## Backend API Reference
+
+Below is a quick reference for the main backend endpoints.
+
+### Authentication
+- `POST /auth/register` – Creates a new account using `{ email, password, name }`.
+- `POST /auth/login` – Logs a user in with `{ email, password }` and returns `{ token }`.
+
+### Dashboard & Tasks
+- `GET /tasks/me` – Returns tasks assigned to the current user.
+- `PATCH /tasks/:id` – Updates a task’s list when moving cards on the board.
+
+### Projects & Board
+- `GET /projects` – Fetches all projects.
+- `POST /projects` – Creates a project using `{ name }`.
+- `GET /projects/:id/board` – Retrieves task lists and tasks for a project board.
+
+### Companies & Users (Admin)
+- `GET /companies` – Lists companies.
+- `POST /companies` – Creates a company via `{ name }`.
+- `GET /users` – Lists users.
+- `PATCH /users/:id` – Assigns a company to a user using `{ companyId }`.
+- `PATCH /users/:id/role` – Updates a user’s role with `{ role }`.
+
+### Notifications
+- `GET /notifications` – Retrieves notifications for the signed‑in user.
+- `PATCH /notifications/:id/read` – Marks a notification as read.
