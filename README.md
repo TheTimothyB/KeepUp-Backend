@@ -76,5 +76,9 @@ KeepUp aims to be scalable with features such as:
 - Free users with limited permissions
 - Custom fields for tasks
 
+## Authentication
+
+Use `/auth/register` to create a new user with a JSON body containing `username` and `password`. Log in via `/auth/login` with the same fields to receive a JWT token.
+
 This README outlines the current vision and early development goals for KeepUp. The codebase is intentionally minimal as the project is in its initial stages.
 

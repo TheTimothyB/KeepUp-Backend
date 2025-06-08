@@ -14,6 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Account {
   id        Int      @id @default(autoincrement())
   accountId String   @unique
@@ -25,7 +26,7 @@ model Account {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String
+  username  String   @unique
   password  String
   createdAt DateTime @default(now())
 
