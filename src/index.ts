@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import boardRoutes from './routes/boards';
 import projectRoutes from './routes/projects';
+import taskRoutes from './routes/tasks';
 dotenv.config();
 
 const app = express();
@@ -24,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 app.use(boardRoutes);
 app.use(projectRoutes);
+app.use(taskRoutes);
 
 // Register new user
 app.post('/auth/register', async (req, res) => {

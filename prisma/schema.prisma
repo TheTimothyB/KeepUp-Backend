@@ -39,6 +39,8 @@ model User {
   account   Account @relation(fields: [accountId], references: [id])
   accountId Int
 
+  tasks Task[]
+
   @@unique([accountId, username])
 }
 
@@ -62,3 +64,24 @@ model Project {
   category   ProjectCategory? @relation(fields: [categoryId], references: [id])
   categoryId Int?
 }
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  taskId      String    @unique
+  name        String
+  description String?
+  startDate   DateTime?
+  dueDate     DateTime?
+  priority    Priority  @default(MEDIUM)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  assignedUsers User[]
+}
+
