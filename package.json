@@ -32,7 +32,8 @@
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
-    "test": "jest"
+    "test": "jest",
+    "create-user": "ts-node scripts/createUser.ts"
   },
   "repository": {
     "type": "git",
