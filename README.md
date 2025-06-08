@@ -26,6 +26,9 @@ The initial goal is to build a functional foundation that can grow in the future
 - Ability to create new accounts and add users under an account ID
 - User authentication with username and password (with optional Gmail or Microsoft linkage)
 - Admin and basic user roles (future permissions can be added later)
+
+## Role Management
+KeepUp now defines two user roles: `ADMIN` and `BASIC`. Future permission settings will be added to these roles as the project evolves.
 - Restrict user access to certain projects
 - User home page showing only their tasks
 - Company and project hierarchy:
