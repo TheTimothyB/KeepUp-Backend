@@ -10,6 +10,7 @@ import boardRoutes from './routes/boards';
 import projectRoutes from './routes/projects';
 import taskRoutes from './routes/tasks';
 import companyRoutes from './routes/companies';
+import authRoutes from './routes/auth';
 dotenv.config();
 
 const app = express();
@@ -28,6 +29,7 @@ app.use(boardRoutes);
 app.use(projectRoutes);
 app.use(taskRoutes);
 app.use(companyRoutes);
+app.use(authRoutes);
 
 // Register new user
 app.post('/auth/register', async (req, res) => {
