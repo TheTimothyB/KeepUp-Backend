@@ -82,3 +82,22 @@ export const createProject = (req: Request, res: Response) => {
   projects.push(project);
   res.status(201).json(project);
 };
+
+export const getProject = (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const project = projects.find((p) => p.id === id);
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+  res.json(project);
+};
+
+export const updateProject = (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const project = projects.find((p) => p.id === id);
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+  project.name = req.body.name ?? project.name;
+  res.json(project);
+};
