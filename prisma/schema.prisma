@@ -85,3 +85,13 @@ model Task {
   assignedUsers User[]
 }
 
+model UserProjectAccess {
+  user     User    @relation(fields: [userId], references: [id])
+  userId   Int
+  project  Project @relation(fields: [projectId], references: [id])
+  projectId Int
+  role     String?
+
+  @@id([userId, projectId])
+}
+
