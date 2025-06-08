@@ -65,6 +65,11 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     res.status(409).json({ error: 'Username already exists' });
     return;
   }
+  const allowedRoles = [UserRole.ADMIN, UserRole.BASIC];
+  if (role && !allowedRoles.includes(role)) {
+    res.status(400).json({ error: 'Invalid role' });
+    return;
+  }
   const hashed = await bcrypt.hash(password, 10);
   const user: User = {
     id: userCounter++,

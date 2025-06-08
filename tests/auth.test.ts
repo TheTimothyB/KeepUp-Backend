@@ -30,4 +30,21 @@ describe('Account and user registration', () => {
     expect(users[0].accountId).toBe(accountId);
     expect(users[0].role).toBe('BASIC');
   });
+
+  it('validates role when registering user', async () => {
+    const acc = await request(app).post('/accounts').send({ name: 'RoleOrg' });
+    const accountId = acc.body.id;
+
+    const adminRes = await request(app)
+      .post(`/accounts/${accountId}/users`)
+      .send({ username: 'admin', password: 'pass', role: 'ADMIN' });
+    expect(adminRes.status).toBe(201);
+    expect(users[0].role).toBe('ADMIN');
+
+    const invalid = await request(app)
+      .post(`/accounts/${accountId}/users`)
+      .send({ username: 'bad', password: 'pass', role: 'INVALID' });
+    expect(invalid.status).toBe(400);
+    expect(users.length).toBe(1);
+  });
 });
