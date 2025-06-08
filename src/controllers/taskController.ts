@@ -20,7 +20,9 @@ function generateShortId() {
 
 export const createTask = (req: Request, res: Response): void => {
   const { name, description, startDate, dueDate, priority, assignedUserIds } =
-    req.body as Partial<Omit<Task, 'id' | 'taskId' | 'createdAt' | 'updatedAt'>> & {
+    req.body as Partial<
+      Omit<Task, 'id' | 'taskId' | 'createdAt' | 'updatedAt'>
+    > & {
       assignedUserIds?: number[];
     };
 
@@ -33,14 +35,37 @@ export const createTask = (req: Request, res: Response): void => {
     return;
   }
 
+  let parsedStart: Date | undefined;
+  if (startDate) {
+    parsedStart = new Date(startDate);
+    if (isNaN(parsedStart.getTime())) {
+      res.status(400).json({ error: 'Invalid startDate' });
+      return;
+    }
+  }
+
+  let parsedDue: Date | undefined;
+  if (dueDate) {
+    parsedDue = new Date(dueDate);
+    if (isNaN(parsedDue.getTime())) {
+      res.status(400).json({ error: 'Invalid dueDate' });
+      return;
+    }
+  }
+
+  if (priority && !['LOW', 'MEDIUM', 'HIGH'].includes(priority)) {
+    res.status(400).json({ error: 'Invalid priority' });
+    return;
+  }
+
   const now = new Date();
   const task: Task = {
     id: idCounter++,
     taskId: generateShortId(),
     name,
     description,
-    startDate: startDate ? new Date(startDate) : undefined,
-    dueDate: dueDate ? new Date(dueDate) : undefined,
+    startDate: parsedStart,
+    dueDate: parsedDue,
     priority: (priority as Task['priority']) || 'MEDIUM',
     createdAt: now,
     updatedAt: now,

@@ -36,6 +36,30 @@ describe('Tasks API', () => {
     expect(getRes.body.assignedUserIds.length).toBe(2);
   });
 
+  it('rejects invalid startDate', async () => {
+    const res = await request(app).post('/tasks').send({
+      name: 'Bad',
+      startDate: 'not-a-date',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects invalid dueDate', async () => {
+    const res = await request(app).post('/tasks').send({
+      name: 'Bad',
+      dueDate: 'also-bad',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects invalid priority', async () => {
+    const res = await request(app).post('/tasks').send({
+      name: 'Bad',
+      priority: 'URGENT',
+    });
+    expect(res.status).toBe(400);
+  });
+
   it('logs time and computes total', async () => {
     const create = await request(app).post('/tasks').send({ name: 'T' });
     const taskId = create.body.taskId;
