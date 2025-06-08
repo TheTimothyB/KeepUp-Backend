@@ -86,4 +86,12 @@ describe('Project access control', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
   });
+
+  it('returns 400 for non-numeric project ID', async () => {
+    const token = jwt.sign({ userId: 1, role: 'BASIC' }, SECRET);
+    const res = await request(app)
+      .get('/projects/abc')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(400);
+  });
 });
