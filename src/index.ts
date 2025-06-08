@@ -32,14 +32,16 @@ app.use(companyRoutes);
 app.use(authRoutes);
 
 // Register new user
-app.post('/auth/register', async (req, res) => {
+app.post('/auth/register', async (req, res): Promise<void> => {
   const { username, password } = req.body as { username?: string; password?: string };
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required' });
+    res.status(400).json({ error: 'Username and password required' });
+    return;
   }
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
-    return res.status(409).json({ error: 'Username already exists' });
+    res.status(409).json({ error: 'Username already exists' });
+    return;
   }
   const hashed = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({ data: { username, password: hashed } });
@@ -48,18 +50,21 @@ app.post('/auth/register', async (req, res) => {
 });
 
 // Login existing user
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', async (req, res): Promise<void> => {
   const { username, password } = req.body as { username?: string; password?: string };
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required' });
+    res.status(400).json({ error: 'Username and password required' });
+    return;
   }
   const user = await prisma.user.findUnique({ where: { username } });
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
   }
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
   }
   const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
   res.json({ token });

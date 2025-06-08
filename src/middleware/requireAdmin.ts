@@ -5,7 +5,11 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 // Simple placeholder middleware to restrict routes to admins.
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+export function requireAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
   let role = (req as any).userRole as UserRole | undefined;
   if (!role) {
     const auth = req.headers.authorization;
@@ -20,7 +24,9 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     }
   }
   if (role === UserRole.ADMIN) {
-    return next();
+    next();
+    return;
   }
-  return res.status(403).json({ message: 'Admin access required' });
+  res.status(403).json({ message: 'Admin access required' });
+  return;
 }
