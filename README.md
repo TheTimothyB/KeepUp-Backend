@@ -112,28 +112,55 @@ place it in the `Uncategorized` group for its account.
 
 ## Backend API Reference
 
-Below is a quick reference for the main backend endpoints.
+Below is a quick reference for the available endpoints.
 
 ### Authentication
-- `POST /auth/register` – Creates a new account using `{ email, password, name }`.
-- `POST /auth/login` – Logs a user in with `{ email, password }` and returns `{ token }`.
+- `POST /auth/register` – Registers a user using `{ username, password }` and returns `{ token }`.
+- `POST /auth/login` – Logs in with `{ username, password }` and returns `{ token }`.
 
-### Dashboard & Tasks
-- `GET /tasks/me` – Returns tasks assigned to the current user.
-- `PATCH /tasks/:id` – Updates a task’s list when moving cards on the board.
+### Accounts & Users
+- `POST /accounts` – Create an account via `{ name }`.
+- `POST /accounts/:accountId/users` – Add a user to an account using `{ username, password, role? }`.
 
-### Projects & Board
-- `GET /projects` – Fetches all projects.
-- `POST /projects` – Creates a project using `{ name }`.
-- `GET /projects/:id/board` – Retrieves task lists and tasks for a project board.
+### Boards
+- `POST /boards` – Create a project board.
+- `GET /boards/:id` – Retrieve a board and its lists.
+- `PUT /boards/:id` – Update a board.
+- `DELETE /boards/:id` – Delete a board.
+- `POST /boards/:id/lists` – Add a list to a board.
+- `PUT /lists/:id` – Update a list.
+- `DELETE /lists/:id` – Delete a list.
+- `POST /lists/:id/tasks` – Add a task to a list.
+- `PUT /tasks/:id` – Update a board task.
+- `DELETE /tasks/:id` – Delete a board task.
 
-### Companies & Users (Admin)
-- `GET /companies` – Lists companies.
-- `POST /companies` – Creates a company via `{ name }`.
-- `GET /users` – Lists users.
-- `PATCH /users/:id` – Assigns a company to a user using `{ companyId }`.
-- `PATCH /users/:id/role` – Updates a user’s role with `{ role }`.
+### Projects & Categories
+- `POST /categories` – Create a project category using `{ name, accountId }`.
+- `GET /categories` – List categories (filter by `accountId` query param).
+- `PATCH /categories/:id` – Rename a category.
+- `DELETE /categories/:id` – Remove a category.
+- `POST /projects` – Create a project using `{ name, accountId, companyId, categoryId? }`.
+- `GET /projects/:id` – Retrieve a project (authorization required).
+- `PATCH /projects/:id` – Update a project.
 
-### Notifications
-- `GET /notifications` – Retrieves notifications for the signed‑in user.
-- `PATCH /notifications/:id/read` – Marks a notification as read.
+### Companies
+- `POST /companies` – Create a company via `{ name, accountId, isMasterCompany? }`.
+- `POST /companies/:id/users` – Assign users to a company.
+- `GET /companies/:id` – Get a company with its users and projects.
+
+### Tasks
+- `POST /tasks` – Create a task.
+- `GET /tasks/:taskId` – Retrieve a task.
+- `POST /tasks/:taskId/timelogs` – Log time on a task.
+- `PATCH /tasks/:taskId/progress` – Update a task’s progress percentage.
+- `PATCH /tasks/:taskId/tags` – Update task tags.
+- `POST /tags` – Create a tag.
+- `POST /tasks/:taskId/comments` – Add a comment.
+- `GET /tasks/:taskId/comments` – List comments on a task.
+- `POST /tasks/:taskId/followers` – Follow or unfollow a task.
+- `POST /tasks/:taskId/repeat` – Set repeat settings for a task.
+- `POST /tasks/process-repeats` – Process repeating tasks.
+
+### Misc
+- `GET /health` – Simple health check.
+- `GET /admin` – Example protected admin route.
