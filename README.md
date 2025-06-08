@@ -85,3 +85,16 @@ Use `/auth/register` to create a new user with a JSON body containing `username`
 
 This README outlines the current vision and early development goals for KeepUp. The codebase is intentionally minimal as the project is in its initial stages.
 
+## Project Categories API
+
+Projects can be grouped into categories for better organization. Use the
+following endpoints to manage them:
+
+- `POST /categories` - create a category
+- `GET /categories` - list categories (filter by `accountId` query param)
+- `PATCH /categories/:id` - rename a category
+- `DELETE /categories/:id` - remove a category
+
+When creating a project via `POST /projects`, omit `categoryId` to automatically
+place it in the `Uncategorized` group for its account.
+
