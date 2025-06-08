@@ -83,6 +83,17 @@ KeepUp aims to be scalable with features such as:
 
 Use `/auth/register` to create a new user with a JSON body containing `username` and `password`. Log in via `/auth/login` with the same fields to receive a JWT token.
 
+### Adding a user via script
+
+For development you can also create a user from the command line. Set the
+environment variables `USER_EMAIL`, `USER_PASSWORD` and `ACCOUNT_ID` then run:
+
+```bash
+npx ts-node scripts/createUser.ts
+```
+
+This will create a BASIC role user under the specified account.
+
 This README outlines the current vision and early development goals for KeepUp. The codebase is intentionally minimal as the project is in its initial stages.
 
 ## Project Categories API
