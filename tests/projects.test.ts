@@ -36,7 +36,7 @@ describe('Project categories API', () => {
   it('assigns default category when creating a project', async () => {
     const res = await request(app)
       .post('/projects')
-      .send({ name: 'Proj', accountId: 2 });
+      .send({ name: 'Proj', accountId: 2, companyId: 1 });
     expect(res.status).toBe(201);
     expect(res.body.categoryId).toBeDefined();
     const cats = await request(app).get('/categories?accountId=2');
@@ -53,7 +53,7 @@ describe('Project access control', () => {
   it('denies access when user lacks permission', async () => {
     const create = await request(app)
       .post('/projects')
-      .send({ name: 'A', accountId: 1 });
+      .send({ name: 'A', accountId: 1, companyId: 1 });
     const id = create.body.id;
     const token = jwt.sign({ userId: 1, role: 'BASIC' }, SECRET);
     const res = await request(app)
@@ -65,7 +65,7 @@ describe('Project access control', () => {
   it('allows access when entry exists', async () => {
     const create = await request(app)
       .post('/projects')
-      .send({ name: 'A', accountId: 1 });
+      .send({ name: 'A', accountId: 1, companyId: 1 });
     const id = create.body.id;
     userProjectAccess.push({ userId: 1, projectId: id });
     const token = jwt.sign({ userId: 1, role: 'BASIC' }, SECRET);
@@ -78,7 +78,7 @@ describe('Project access control', () => {
   it('allows admin regardless of entry', async () => {
     const create = await request(app)
       .post('/projects')
-      .send({ name: 'A', accountId: 1 });
+      .send({ name: 'A', accountId: 1, companyId: 1 });
     const id = create.body.id;
     const token = jwt.sign({ userId: 2, role: 'ADMIN' }, SECRET);
     const res = await request(app)

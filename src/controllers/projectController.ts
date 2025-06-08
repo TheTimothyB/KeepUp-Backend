@@ -59,13 +59,16 @@ export const deleteCategory = (req: Request, res: Response) => {
 };
 
 export const createProject = (req: Request, res: Response) => {
-  const { name, accountId, categoryId } = req.body as {
+  const { name, accountId, companyId, categoryId } = req.body as {
     name?: string;
     accountId?: number;
+    companyId?: number;
     categoryId?: number;
   };
-  if (!name || !accountId) {
-    return res.status(400).json({ error: 'Name and accountId required' });
+  if (!name || !accountId || !companyId) {
+    return res
+      .status(400)
+      .json({ error: 'Name, accountId and companyId required' });
   }
   let catId = categoryId;
   if (!catId) {
@@ -76,6 +79,7 @@ export const createProject = (req: Request, res: Response) => {
     id: projectCounter++,
     name,
     accountId,
+    companyId,
     createdAt: new Date(),
     categoryId: catId,
   };

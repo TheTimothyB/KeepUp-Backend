@@ -9,6 +9,7 @@ export interface Project {
   id: number;
   name: string;
   accountId: number;
+  companyId: number;
   createdAt: Date;
   categoryId?: number;
 }
