@@ -2,6 +2,13 @@ import { Request, Response } from 'express';
 import { tasks, Task } from '../models/Task';
 import { timeLogs, TimeLog } from '../models/TimeLog';
 import { tags as tagStore, Tag } from '../models/Tag';
+import { comments, Comment } from '../models/Comment';
+import { followers, Follower } from '../models/Follower';
+import {
+  repeatSettings,
+  RepeatSetting,
+  RepeatPattern,
+} from '../models/RepeatSetting';
 
 let idCounter = 1;
 let timeLogCounter = 1;
@@ -117,4 +124,120 @@ export const updateTaskTags = (req: Request, res: Response) => {
   task.tagIds = tagIds;
   task.updatedAt = new Date();
   res.json(task);
+};
+
+let commentIdCounter = 1;
+
+export const addComment = (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const task = tasks.find((t) => t.taskId === taskId);
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+  const { text, userId } = req.body as { text?: string; userId?: number };
+  if (!text || typeof userId !== 'number') {
+    return res.status(400).json({ error: 'text and userId required' });
+  }
+  const mentions = text.match(/@\w+/g)?.map((m) => m.substring(1)) || [];
+  const comment: Comment = {
+    id: commentIdCounter++,
+    taskId,
+    userId,
+    text,
+    createdAt: new Date(),
+    mentions,
+  };
+  comments.push(comment);
+  followers
+    .filter((f) => f.taskId === taskId)
+    .forEach((f) => console.log(`Notify follower ${f.userId} about comment`));
+  mentions.forEach((m) => console.log(`Notify mentioned user ${m}`));
+  res.status(201).json(comment);
+};
+
+export const getComments = (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const task = tasks.find((t) => t.taskId === taskId);
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+  res.json(comments.filter((c) => c.taskId === taskId));
+};
+
+export const toggleFollow = (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const task = tasks.find((t) => t.taskId === taskId);
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+  const { userId } = req.body as { userId?: number };
+  if (typeof userId !== 'number') {
+    return res.status(400).json({ error: 'userId required' });
+  }
+  const idx = followers.findIndex(
+    (f) => f.taskId === taskId && f.userId === userId
+  );
+  if (idx !== -1) {
+    followers.splice(idx, 1);
+    return res.json({ following: false });
+  } else {
+    const follower: Follower = { taskId, userId };
+    followers.push(follower);
+    return res.json({ following: true });
+  }
+};
+
+export const setRepeat = (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const task = tasks.find((t) => t.taskId === taskId);
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+  const { pattern } = req.body as { pattern?: RepeatPattern };
+  if (!pattern || !['DAILY', 'WEEKLY'].includes(pattern)) {
+    return res.status(400).json({ error: 'Invalid pattern' });
+  }
+  let setting = repeatSettings.find((r) => r.taskId === taskId);
+  if (!setting) {
+    setting = { taskId, pattern } as RepeatSetting;
+    repeatSettings.push(setting);
+  } else {
+    setting.pattern = pattern;
+  }
+  res.status(201).json(setting);
+};
+
+function addInterval(date: Date, pattern: RepeatPattern) {
+  const day = 24 * 60 * 60 * 1000;
+  const inc = pattern === 'DAILY' ? day : 7 * day;
+  return new Date(date.getTime() + inc);
+}
+
+export const processRepeats = () => {
+  const now = new Date();
+  for (const setting of repeatSettings) {
+    const task = tasks.find((t) => t.taskId === setting.taskId);
+    if (!task || !task.dueDate) continue;
+    if (task.dueDate <= now && setting.lastGenerated !== task.dueDate) {
+      const newTask: Task = {
+        ...task,
+        id: idCounter++,
+        taskId: generateShortId(),
+        createdAt: now,
+        updatedAt: now,
+        startDate: task.startDate
+          ? addInterval(task.startDate, setting.pattern)
+          : undefined,
+        dueDate: addInterval(task.dueDate, setting.pattern),
+      };
+      tasks.push(newTask);
+      setting.taskId = newTask.taskId;
+      setting.lastGenerated = task.dueDate;
+    }
+  }
+};
+
+export const processRepeatsHandler = (_req: Request, res: Response) => {
+  processRepeats();
+  res.json({ count: tasks.length });
 };
