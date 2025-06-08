@@ -3,12 +3,18 @@ import app from '../src/index';
 import { tasks } from '../src/models/Task';
 import { timeLogs } from '../src/models/TimeLog';
 import { tags } from '../src/models/Tag';
+import { comments } from '../src/models/Comment';
+import { followers } from '../src/models/Follower';
+import { repeatSettings } from '../src/models/RepeatSetting';
 
 describe('Tasks API', () => {
   beforeEach(() => {
     tasks.length = 0;
     timeLogs.length = 0;
     tags.length = 0;
+    comments.length = 0;
+    followers.length = 0;
+    repeatSettings.length = 0;
   });
 
   it('creates and retrieves a task', async () => {
@@ -53,5 +59,42 @@ describe('Tasks API', () => {
       .send({ tagIds: [tagId] });
     expect(update.status).toBe(200);
     expect(update.body.tagIds).toContain(tagId);
+  });
+
+  it('parses mentions and sends notifications', async () => {
+    const create = await request(app).post('/tasks').send({ name: 'Com' });
+    const taskId = create.body.taskId;
+    await request(app).post(`/tasks/${taskId}/followers`).send({ userId: 1 });
+    const logs: string[] = [];
+    const orig = console.log;
+    console.log = (msg: any) => {
+      logs.push(String(msg));
+    };
+    const res = await request(app)
+      .post(`/tasks/${taskId}/comments`)
+      .send({ userId: 2, text: 'hello @john' });
+    console.log = orig;
+    expect(res.status).toBe(201);
+    expect(res.body.mentions).toContain('john');
+    expect(logs.some((l) => l.includes('follower 1'))).toBe(true);
+    expect(logs.some((l) => l.includes('john'))).toBe(true);
+  });
+
+  it('creates a new task when repeat due date is reached', async () => {
+    const past = new Date(Date.now() - 86400000).toISOString();
+    const res = await request(app).post('/tasks').send({
+      name: 'Repeat',
+      startDate: past,
+      dueDate: past,
+    });
+    const taskId = res.body.taskId;
+    await request(app).post(`/tasks/${taskId}/repeat`).send({ pattern: 'DAILY' });
+    const before = tasks.length;
+    await request(app).post('/tasks/process-repeats');
+    expect(tasks.length).toBe(before + 1);
+    const newTask = tasks[tasks.length - 1];
+    expect(new Date(newTask.dueDate).getTime()).toBeGreaterThan(
+      new Date(res.body.dueDate).getTime()
+    );
   });
 });
