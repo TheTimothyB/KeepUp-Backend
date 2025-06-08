@@ -6,15 +6,22 @@ import { requireAdmin } from './middleware/requireAdmin';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import boardRoutes from './routes/boards';
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
+if (process.env.NODE_ENV !== 'test') {
+  prisma = new PrismaClient();
+} else {
+  prisma = {} as PrismaClient;
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(boardRoutes);
 
 // Register new user
 app.post('/auth/register', async (req, res) => {
@@ -62,6 +69,10 @@ app.get('/admin', requireAdmin, (_req, res) => {
 
 // Start
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`KeepUp backend listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`KeepUp backend listening on port ${port}`);
+  });
+}
+
+export default app;
