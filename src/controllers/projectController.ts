@@ -10,10 +10,11 @@ import {
 let categoryCounter = 1;
 let projectCounter = 1;
 
-export const createCategory = (req: Request, res: Response) => {
+export const createCategory = (req: Request, res: Response): void => {
   const { name, accountId } = req.body as { name?: string; accountId?: number };
   if (!name || !accountId) {
-    return res.status(400).json({ error: 'Name and accountId required' });
+    res.status(400).json({ error: 'Name and accountId required' });
+    return;
   }
   const category: ProjectCategory = {
     id: categoryCounter++,
@@ -33,21 +34,23 @@ export const listCategories = (req: Request, res: Response) => {
   res.json(result);
 };
 
-export const updateCategory = (req: Request, res: Response) => {
+export const updateCategory = (req: Request, res: Response): void => {
   const id = Number(req.params.id);
   const category = categories.find((c) => c.id === id);
   if (!category) {
-    return res.status(404).json({ error: 'Category not found' });
+    res.status(404).json({ error: 'Category not found' });
+    return;
   }
   category.name = req.body.name ?? category.name;
   res.json(category);
 };
 
-export const deleteCategory = (req: Request, res: Response) => {
+export const deleteCategory = (req: Request, res: Response): void => {
   const id = Number(req.params.id);
   const index = categories.findIndex((c) => c.id === id);
   if (index === -1) {
-    return res.status(404).json({ error: 'Category not found' });
+    res.status(404).json({ error: 'Category not found' });
+    return;
   }
   categories.splice(index, 1);
   projects.forEach((p) => {
@@ -58,7 +61,7 @@ export const deleteCategory = (req: Request, res: Response) => {
   res.status(204).send();
 };
 
-export const createProject = (req: Request, res: Response) => {
+export const createProject = (req: Request, res: Response): void => {
   const { name, accountId, companyId, categoryId } = req.body as {
     name?: string;
     accountId?: number;
@@ -66,9 +69,8 @@ export const createProject = (req: Request, res: Response) => {
     categoryId?: number;
   };
   if (!name || !accountId || !companyId) {
-    return res
-      .status(400)
-      .json({ error: 'Name, accountId and companyId required' });
+    res.status(400).json({ error: 'Name, accountId and companyId required' });
+    return;
   }
   let catId = categoryId;
   if (!catId) {
@@ -87,20 +89,22 @@ export const createProject = (req: Request, res: Response) => {
   res.status(201).json(project);
 };
 
-export const getProject = (req: Request, res: Response) => {
+export const getProject = (req: Request, res: Response): void => {
   const id = Number(req.params.id);
   const project = projects.find((p) => p.id === id);
   if (!project) {
-    return res.status(404).json({ error: 'Project not found' });
+    res.status(404).json({ error: 'Project not found' });
+    return;
   }
   res.json(project);
 };
 
-export const updateProject = (req: Request, res: Response) => {
+export const updateProject = (req: Request, res: Response): void => {
   const id = Number(req.params.id);
   const project = projects.find((p) => p.id === id);
   if (!project) {
-    return res.status(404).json({ error: 'Project not found' });
+    res.status(404).json({ error: 'Project not found' });
+    return;
   }
   project.name = req.body.name ?? project.name;
   res.json(project);

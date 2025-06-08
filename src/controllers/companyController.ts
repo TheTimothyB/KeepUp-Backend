@@ -4,20 +4,22 @@ import { projects } from '../models/Project';
 
 let companyCounter = 1;
 
-export const createCompany = (req: Request, res: Response) => {
+export const createCompany = (req: Request, res: Response): void => {
   const { name, accountId, isMasterCompany } = req.body as {
     name?: string;
     accountId?: number;
     isMasterCompany?: boolean;
   };
   if (!name || !accountId) {
-    return res.status(400).json({ error: 'name and accountId required' });
+    res.status(400).json({ error: 'name and accountId required' });
+    return;
   }
   if (
     isMasterCompany &&
     companies.some((c) => c.accountId === accountId && c.isMasterCompany)
   ) {
-    return res.status(400).json({ error: 'Master company already exists' });
+    res.status(400).json({ error: 'Master company already exists' });
+    return;
   }
   const company: Company = {
     id: companyCounter++,
@@ -30,15 +32,17 @@ export const createCompany = (req: Request, res: Response) => {
   res.status(201).json(company);
 };
 
-export const assignUsersToCompany = (req: Request, res: Response) => {
+export const assignUsersToCompany = (req: Request, res: Response): void => {
   const companyId = Number(req.params.id);
   const { userIds, role } = req.body as { userIds?: number[]; role?: string };
   if (!Array.isArray(userIds) || userIds.length === 0) {
-    return res.status(400).json({ error: 'userIds required' });
+    res.status(400).json({ error: 'userIds required' });
+    return;
   }
   const company = companies.find((c) => c.id === companyId);
   if (!company) {
-    return res.status(404).json({ error: 'Company not found' });
+    res.status(404).json({ error: 'Company not found' });
+    return;
   }
   userIds.forEach((userId) => {
     const existing = userCompanies.find(
@@ -54,11 +58,12 @@ export const assignUsersToCompany = (req: Request, res: Response) => {
   res.json({ success: true });
 };
 
-export const getCompany = (req: Request, res: Response) => {
+export const getCompany = (req: Request, res: Response): void => {
   const id = Number(req.params.id);
   const company = companies.find((c) => c.id === id);
   if (!company) {
-    return res.status(404).json({ error: 'Company not found' });
+    res.status(404).json({ error: 'Company not found' });
+    return;
   }
   const users = userCompanies
     .filter((uc) => uc.companyId === id)

@@ -18,17 +18,19 @@ function generateShortId() {
   return Math.random().toString(36).substring(2, 8);
 }
 
-export const createTask = (req: Request, res: Response) => {
+export const createTask = (req: Request, res: Response): void => {
   const { name, description, startDate, dueDate, priority, assignedUserIds } =
     req.body as Partial<Omit<Task, 'id' | 'taskId' | 'createdAt' | 'updatedAt'>> & {
       assignedUserIds?: number[];
     };
 
   if (!name) {
-    return res.status(400).json({ error: 'Name required' });
+    res.status(400).json({ error: 'Name required' });
+    return;
   }
   if (assignedUserIds && !Array.isArray(assignedUserIds)) {
-    return res.status(400).json({ error: 'assignedUserIds must be an array' });
+    res.status(400).json({ error: 'assignedUserIds must be an array' });
+    return;
   }
 
   const now = new Date();
@@ -50,29 +52,33 @@ export const createTask = (req: Request, res: Response) => {
   res.status(201).json(task);
 };
 
-export const getTask = (req: Request, res: Response) => {
+export const getTask = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   res.json(task);
 };
 
-export const logTime = (req: Request, res: Response) => {
+export const logTime = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { start, end } = req.body as { start?: string; end?: string };
   if (!start || !end) {
-    return res.status(400).json({ error: 'start and end required' });
+    res.status(400).json({ error: 'start and end required' });
+    return;
   }
   const startDate = new Date(start);
   const endDate = new Date(end);
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return res.status(400).json({ error: 'Invalid dates' });
+    res.status(400).json({ error: 'Invalid dates' });
+    return;
   }
   const totalMs = endDate.getTime() - startDate.getTime();
   const log: TimeLog = {
@@ -86,40 +92,45 @@ export const logTime = (req: Request, res: Response) => {
   res.status(201).json(log);
 };
 
-export const updateProgress = (req: Request, res: Response) => {
+export const updateProgress = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { progress } = req.body as { progress?: number };
   if (typeof progress !== 'number' || progress < 0 || progress > 100) {
-    return res.status(400).json({ error: 'progress must be 0-100' });
+    res.status(400).json({ error: 'progress must be 0-100' });
+    return;
   }
   task.progress = progress;
   task.updatedAt = new Date();
   res.json(task);
 };
 
-export const createTag = (req: Request, res: Response) => {
+export const createTag = (req: Request, res: Response): void => {
   const { name } = req.body as { name?: string };
   if (!name) {
-    return res.status(400).json({ error: 'Name required' });
+    res.status(400).json({ error: 'Name required' });
+    return;
   }
   const tag: Tag = { id: tagIdCounter++, name };
   tagStore.push(tag);
   res.status(201).json(tag);
 };
 
-export const updateTaskTags = (req: Request, res: Response) => {
+export const updateTaskTags = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { tagIds } = req.body as { tagIds?: number[] };
   if (!Array.isArray(tagIds)) {
-    return res.status(400).json({ error: 'tagIds must be array' });
+    res.status(400).json({ error: 'tagIds must be array' });
+    return;
   }
   task.tagIds = tagIds;
   task.updatedAt = new Date();
@@ -128,15 +139,17 @@ export const updateTaskTags = (req: Request, res: Response) => {
 
 let commentIdCounter = 1;
 
-export const addComment = (req: Request, res: Response) => {
+export const addComment = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { text, userId } = req.body as { text?: string; userId?: number };
   if (!text || typeof userId !== 'number') {
-    return res.status(400).json({ error: 'text and userId required' });
+    res.status(400).json({ error: 'text and userId required' });
+    return;
   }
   const mentions = text.match(/@\w+/g)?.map((m) => m.substring(1)) || [];
   const comment: Comment = {
@@ -155,47 +168,54 @@ export const addComment = (req: Request, res: Response) => {
   res.status(201).json(comment);
 };
 
-export const getComments = (req: Request, res: Response) => {
+export const getComments = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   res.json(comments.filter((c) => c.taskId === taskId));
 };
 
-export const toggleFollow = (req: Request, res: Response) => {
+export const toggleFollow = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { userId } = req.body as { userId?: number };
   if (typeof userId !== 'number') {
-    return res.status(400).json({ error: 'userId required' });
+    res.status(400).json({ error: 'userId required' });
+    return;
   }
   const idx = followers.findIndex(
     (f) => f.taskId === taskId && f.userId === userId
   );
   if (idx !== -1) {
     followers.splice(idx, 1);
-    return res.json({ following: false });
+    res.json({ following: false });
+    return;
   } else {
     const follower: Follower = { taskId, userId };
     followers.push(follower);
-    return res.json({ following: true });
+    res.json({ following: true });
+    return;
   }
 };
 
-export const setRepeat = (req: Request, res: Response) => {
+export const setRepeat = (req: Request, res: Response): void => {
   const { taskId } = req.params;
   const task = tasks.find((t) => t.taskId === taskId);
   if (!task) {
-    return res.status(404).json({ error: 'Task not found' });
+    res.status(404).json({ error: 'Task not found' });
+    return;
   }
   const { pattern } = req.body as { pattern?: RepeatPattern };
   if (!pattern || !['DAILY', 'WEEKLY'].includes(pattern)) {
-    return res.status(400).json({ error: 'Invalid pattern' });
+    res.status(400).json({ error: 'Invalid pattern' });
+    return;
   }
   let setting = repeatSettings.find((r) => r.taskId === taskId);
   if (!setting) {
@@ -237,7 +257,7 @@ export const processRepeats = () => {
   }
 };
 
-export const processRepeatsHandler = (_req: Request, res: Response) => {
+export const processRepeatsHandler = (_req: Request, res: Response): void => {
   processRepeats();
   res.json({ count: tasks.length });
 };

@@ -6,10 +6,11 @@ import { UserRole } from '../roles';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 export function authorizeProjectAccess(projectIdParamKey: string) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const auth = req.headers.authorization;
     if (!auth || !auth.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authorization required' });
+      res.status(401).json({ error: 'Authorization required' });
+      return;
     }
     try {
       const token = auth.split(' ')[1];
@@ -17,12 +18,14 @@ export function authorizeProjectAccess(projectIdParamKey: string) {
       const userId = payload.userId as number | undefined;
       const role = payload.role as UserRole | undefined;
       if (!userId) {
-        return res.status(401).json({ error: 'Invalid token' });
+        res.status(401).json({ error: 'Invalid token' });
+        return;
       }
       (req as any).userId = userId;
       (req as any).userRole = role;
       if (role === UserRole.ADMIN) {
-        return next();
+        next();
+        return;
       }
       const projectId = Number(req.params[projectIdParamKey]);
       if (
@@ -30,11 +33,14 @@ export function authorizeProjectAccess(projectIdParamKey: string) {
           (a) => a.userId === userId && a.projectId === projectId
         )
       ) {
-        return next();
+        next();
+        return;
       }
-      return res.status(403).json({ error: 'Forbidden' });
+      res.status(403).json({ error: 'Forbidden' });
+      return;
     } catch {
-      return res.status(401).json({ error: 'Invalid token' });
+      res.status(401).json({ error: 'Invalid token' });
+      return;
     }
   };
 }
