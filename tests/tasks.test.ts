@@ -49,6 +49,18 @@ describe('Tasks API', () => {
     expect(log.body.totalMs).toBe(3600000);
   });
 
+  it('rejects time logs where end precedes start', async () => {
+    const create = await request(app).post('/tasks').send({ name: 'T' });
+    const taskId = create.body.taskId;
+    const res = await request(app)
+      .post(`/tasks/${taskId}/timelogs`)
+      .send({
+        start: '2024-01-01T01:00:00.000Z',
+        end: '2024-01-01T00:00:00.000Z',
+      });
+    expect(res.status).toBe(400);
+  });
+
   it('assigns tags to a task', async () => {
     const tag = await request(app).post('/tags').send({ name: 'bug' });
     const tagId = tag.body.id;

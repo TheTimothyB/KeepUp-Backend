@@ -80,6 +80,10 @@ export const logTime = (req: Request, res: Response): void => {
     res.status(400).json({ error: 'Invalid dates' });
     return;
   }
+  if (endDate <= startDate) {
+    res.status(400).json({ error: 'end must be after start' });
+    return;
+  }
   const totalMs = endDate.getTime() - startDate.getTime();
   const log: TimeLog = {
     id: timeLogCounter++,
