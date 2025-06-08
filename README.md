@@ -82,6 +82,7 @@ KeepUp aims to be scalable with features such as:
 ## Authentication
 
 Use `/auth/register` to create a new user with a JSON body containing `username` and `password`. Log in via `/auth/login` with the same fields to receive a JWT token.
+When `NODE_ENV` is set to `test` (for example during Jest runs), these two routes are disabled.
 
 ### Adding a user via script
 
@@ -117,6 +118,7 @@ Below is a quick reference for the available endpoints.
 ### Authentication
 - `POST /auth/register` – Registers a user using `{ username, password }` and returns `{ token }`.
 - `POST /auth/login` – Logs in with `{ username, password }` and returns `{ token }`.
+Both endpoints are skipped when `NODE_ENV=test`.
 
 ### Accounts & Users
 - `POST /accounts` – Create an account via `{ name }`.
