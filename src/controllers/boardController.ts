@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { boards, Board, TaskList, Task } from '../models/ProjectBoard';
 
 let boardIdCounter = 1;
 let listIdCounter = 1;
 let taskIdCounter = 1;
 
-export const createBoard = (req: Request, res: Response): void => {
+export const createBoard = (req: Request, res: Response, _next: NextFunction): void => {
   const { name } = req.body as { name?: string };
   if (!name) {
     res.status(400).json({ error: 'Name required' });
@@ -16,7 +16,7 @@ export const createBoard = (req: Request, res: Response): void => {
   res.status(201).json(board);
 };
 
-export const getBoard = (req: Request, res: Response): void => {
+export const getBoard = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   const board = boards.find((b) => b.id === id);
   if (!board) {
@@ -26,7 +26,7 @@ export const getBoard = (req: Request, res: Response): void => {
   res.json(board);
 };
 
-export const updateBoard = (req: Request, res: Response): void => {
+export const updateBoard = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   const board = boards.find((b) => b.id === id);
   if (!board) {
@@ -37,7 +37,7 @@ export const updateBoard = (req: Request, res: Response): void => {
   res.json(board);
 };
 
-export const deleteBoard = (req: Request, res: Response): void => {
+export const deleteBoard = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   const index = boards.findIndex((b) => b.id === id);
   if (index === -1) {
@@ -48,7 +48,7 @@ export const deleteBoard = (req: Request, res: Response): void => {
   res.status(204).send();
 };
 
-export const addListToBoard = (req: Request, res: Response): void => {
+export const addListToBoard = (req: Request, res: Response, _next: NextFunction): void => {
   const boardId = Number(req.params.id);
   const board = boards.find((b) => b.id === boardId);
   if (!board) {
@@ -65,7 +65,7 @@ export const addListToBoard = (req: Request, res: Response): void => {
   res.status(201).json(list);
 };
 
-export const updateList = (req: Request, res: Response): void => {
+export const updateList = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   for (const board of boards) {
     const list = board.lists.find((l) => l.id === id);
@@ -78,7 +78,7 @@ export const updateList = (req: Request, res: Response): void => {
   res.status(404).json({ error: 'List not found' });
 };
 
-export const deleteList = (req: Request, res: Response) => {
+export const deleteList = (req: Request, res: Response, _next: NextFunction) => {
   const id = Number(req.params.id);
   for (const board of boards) {
     const index = board.lists.findIndex((l) => l.id === id);
@@ -91,7 +91,7 @@ export const deleteList = (req: Request, res: Response) => {
   res.status(404).json({ error: 'List not found' });
 };
 
-export const addTaskToList = (req: Request, res: Response): void => {
+export const addTaskToList = (req: Request, res: Response, _next: NextFunction): void => {
   const listId = Number(req.params.id);
   for (const board of boards) {
     const list = board.lists.find((l) => l.id === listId);
@@ -110,7 +110,7 @@ export const addTaskToList = (req: Request, res: Response): void => {
   res.status(404).json({ error: 'List not found' });
 };
 
-export const updateTask = (req: Request, res: Response): void => {
+export const updateTask = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   for (const board of boards) {
     for (const list of board.lists) {
@@ -126,7 +126,7 @@ export const updateTask = (req: Request, res: Response): void => {
   res.status(404).json({ error: 'Task not found' });
 };
 
-export const deleteTask = (req: Request, res: Response): void => {
+export const deleteTask = (req: Request, res: Response, _next: NextFunction): void => {
   const id = Number(req.params.id);
   for (const board of boards) {
     for (const list of board.lists) {
