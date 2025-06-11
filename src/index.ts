@@ -6,6 +6,7 @@ import { requireAdmin } from './middleware/requireAdmin';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import boardRoutes from './routes/boards';
 import projectRoutes from './routes/projects';
 import taskRoutes from './routes/tasks';
@@ -21,8 +22,6 @@ if (process.env.NODE_ENV !== 'test') {
   prisma = {} as PrismaClient;
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-// Default account ID to associate with users created via /auth/register
-const DEFAULT_ACCOUNT_ID = parseInt(process.env.ACCOUNT_ID || '1', 10);
 
 // Middleware
 app.use(cors());
@@ -34,34 +33,43 @@ app.use(companyRoutes);
 app.use(authRoutes);
 
 if (process.env.NODE_ENV !== 'test') {
-  // Register new user
+  // Register a new account and user
   app.post('/auth/register', async (req, res): Promise<void> => {
-    const { username, password } = req.body as { username?: string; password?: string };
-    if (!username || !password) {
-      res.status(400).json({ error: 'Username and password required' });
+    const { email, password, name } = req.body as {
+      email?: string;
+      password?: string;
+      name?: string;
+    };
+    if (!email || !password || !name) {
+      res.status(400).json({ error: 'Email, password and name required' });
       return;
     }
-    const existing = await prisma.user.findUnique({ where: { username } });
+    const existing = await prisma.user.findUnique({ where: { username: email } });
     if (existing) {
-      res.status(409).json({ error: 'Username already exists' });
+      res.status(409).json({ error: 'Email already exists' });
       return;
     }
+
+    const account = await prisma.account.create({
+      data: { accountId: crypto.randomUUID(), name }
+    });
+
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { username, password: hashed, accountId: DEFAULT_ACCOUNT_ID }
+      data: { username: email, password: hashed, accountId: account.id }
     });
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
-    res.json({ token });
+    res.status(201).json({ token });
   });
 
   // Login existing user
   app.post('/auth/login', async (req, res): Promise<void> => {
-    const { username, password } = req.body as { username?: string; password?: string };
-    if (!username || !password) {
-      res.status(400).json({ error: 'Username and password required' });
+    const { email, password } = req.body as { email?: string; password?: string };
+    if (!email || !password) {
+      res.status(400).json({ error: 'Email and password required' });
       return;
     }
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await prisma.user.findUnique({ where: { username: email } });
     if (!user) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
