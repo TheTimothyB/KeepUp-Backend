@@ -24,7 +24,7 @@ The initial goal is to build a functional foundation that can grow in the future
 
 - Account management with a unique account ID
 - Ability to create new accounts and add users under an account ID
-- User authentication with username and password (with optional Gmail or Microsoft linkage)
+- User authentication with email and password (with optional Gmail or Microsoft linkage)
 - Admin and basic user roles (future permissions can be added later)
 
 ## Role Management
@@ -81,7 +81,7 @@ KeepUp aims to be scalable with features such as:
 
 ## Authentication
 
-Use `/auth/register` to create a new user with a JSON body containing `username` and `password`. Log in via `/auth/login` with the same fields to receive a JWT token.
+Use `/auth/register` to create a new account using `{ email, password, name }`. Log in via `/auth/login` with `{ email, password }` to receive a JWT token.
 When `NODE_ENV` is set to `test` (for example during Jest runs), these two routes are disabled.
 
 ### Adding a user via script
@@ -116,13 +116,13 @@ place it in the `Uncategorized` group for its account.
 Below is a quick reference for the available endpoints.
 
 ### Authentication
-- `POST /auth/register` – Registers a user using `{ username, password }` and returns `{ token }`.
-- `POST /auth/login` – Logs in with `{ username, password }` and returns `{ token }`.
+- `POST /auth/register` – Creates an account and user via `{ email, password, name }` and returns `{ token }`.
+- `POST /auth/login` – Logs in with `{ email, password }` and returns `{ token }`.
 Both endpoints are skipped when `NODE_ENV=test`.
 
 ### Accounts & Users
 - `POST /accounts` – Create an account via `{ name }`.
-- `POST /accounts/:accountId/users` – Add a user to an account using `{ username, password, role? }`.
+- `POST /accounts/:accountId/users` – Add a user to an account using `{ email, password, role? }`.
 
 ### Boards
 - `POST /boards` – Create a project board.

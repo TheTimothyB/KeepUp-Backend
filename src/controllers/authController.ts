@@ -47,13 +47,13 @@ export const createAccount = (req: Request, res: Response): void => {
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   const accountId = Number(req.params.accountId);
-  const { username, password, role } = req.body as {
-    username?: string;
+  const { email, password, role } = req.body as {
+    email?: string;
     password?: string;
     role?: UserRole;
   };
-  if (!username || !password) {
-    res.status(400).json({ error: 'username and password required' });
+  if (!email || !password) {
+    res.status(400).json({ error: 'email and password required' });
     return;
   }
   const account = accounts.find((a) => a.id === accountId);
@@ -61,8 +61,8 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     res.status(404).json({ error: 'Account not found' });
     return;
   }
-  if (users.some((u) => u.username === username && u.accountId === accountId)) {
-    res.status(409).json({ error: 'Username already exists' });
+  if (users.some((u) => u.username === email && u.accountId === accountId)) {
+    res.status(409).json({ error: 'Email already exists' });
     return;
   }
   const allowedRoles = [UserRole.ADMIN, UserRole.BASIC];
@@ -73,7 +73,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   const hashed = await bcrypt.hash(password, 10);
   const user: User = {
     id: userCounter++,
-    username,
+    username: email,
     password: hashed,
     role: role || UserRole.BASIC,
     accountId,

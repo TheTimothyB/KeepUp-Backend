@@ -24,7 +24,7 @@ describe('Account and user registration', () => {
     const accountId = acc.body.id;
     const res = await request(app)
       .post(`/accounts/${accountId}/users`)
-      .send({ username: 'user1', password: 'pass' });
+      .send({ email: 'user1@example.com', password: 'pass' });
     expect(res.status).toBe(201);
     expect(users.length).toBe(1);
     expect(users[0].accountId).toBe(accountId);
@@ -37,13 +37,13 @@ describe('Account and user registration', () => {
 
     const adminRes = await request(app)
       .post(`/accounts/${accountId}/users`)
-      .send({ username: 'admin', password: 'pass', role: 'ADMIN' });
+      .send({ email: 'admin@example.com', password: 'pass', role: 'ADMIN' });
     expect(adminRes.status).toBe(201);
     expect(users[0].role).toBe('ADMIN');
 
     const invalid = await request(app)
       .post(`/accounts/${accountId}/users`)
-      .send({ username: 'bad', password: 'pass', role: 'INVALID' });
+      .send({ email: 'bad@example.com', password: 'pass', role: 'INVALID' });
     expect(invalid.status).toBe(400);
     expect(users.length).toBe(1);
   });

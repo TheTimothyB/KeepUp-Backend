@@ -4,7 +4,7 @@ import axios from 'axios';
 export default function Register() {
   const [accountName, setAccountName] = useState('');
   const [accountId, setAccountId] = useState<number | null>(null);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const createAccount = async () => {
@@ -16,7 +16,7 @@ export default function Register() {
 
   const register = async () => {
     if (accountId == null) return;
-    await axios.post(`/accounts/${accountId}/users`, { username, password });
+    await axios.post(`/accounts/${accountId}/users`, { email, password });
   };
 
   return (
@@ -35,11 +35,11 @@ export default function Register() {
       ) : (
         <div>
           <input
-            value={username}
+            value={email}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setUsername(e.target.value)
+              setEmail(e.target.value)
             }
-            placeholder="Username"
+            placeholder="Email"
           />
           <input
             type="password"
