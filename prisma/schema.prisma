@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,64 +7,102 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  BASIC
-}
-
 model Account {
-  id        Int      @id @default(autoincrement())
-  accountId String   @unique
-  name      String
-  createdAt DateTime @default(now())
-
-  users     User[]
-  projectCategories ProjectCategory[]
-  projects          Project[]
+  id                Int               @id @default(autoincrement())
+  accountId         String            @unique
+  name              String
+  createdAt         DateTime          @default(now())
   companies         Company[]
+  projects          Project[]
+  projectCategories ProjectCategory[]
+  users             User[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  role        Role     @default(BASIC)
-  permissions Json?
-  createdAt DateTime @default(now())
-
-  account   Account @relation(fields: [accountId], references: [id])
-  accountId Int
-
-  tasks Task[]
-  companies UserCompany[]
+  id              Int                 @id @default(autoincrement())
+  username        String              @unique
+  password        String
+  role            Role                @default(BASIC)
+  permissions     Json?
+  createdAt       DateTime            @default(now())
+  accountId       Int
+  account         Account             @relation(fields: [accountId], references: [id])
+  companies       UserCompany[]
   projectAccesses UserProjectAccess[]
+  tasks           Task[]              @relation("TaskToUser")
 
   @@unique([accountId, username])
 }
 
 model ProjectCategory {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  account   Account  @relation(fields: [accountId], references: [id])
   accountId Int
-  createdAt DateTime @default(now())
-
+  createdAt DateTime  @default(now())
   projects  Project[]
+  account   Account   @relation(fields: [accountId], references: [id])
 }
 
 model Project {
-  id        Int      @id @default(autoincrement())
-  name      String
-  account   Account  @relation(fields: [accountId], references: [id])
-  accountId Int
-  company   Company  @relation(fields: [companyId], references: [id])
-  companyId Int
-  createdAt DateTime @default(now())
-
-  category   ProjectCategory? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
-
+  id           Int                 @id @default(autoincrement())
+  name         String
+  accountId    Int
+  companyId    Int
+  createdAt    DateTime            @default(now())
+  categoryId   Int?
+  account      Account             @relation(fields: [accountId], references: [id])
+  category     ProjectCategory?    @relation(fields: [categoryId], references: [id])
+  company      Company             @relation(fields: [companyId], references: [id])
   userAccesses UserProjectAccess[]
+}
+
+model Task {
+  id            Int       @id @default(autoincrement())
+  taskId        String    @unique
+  name          String
+  description   String?
+  startDate     DateTime?
+  dueDate       DateTime?
+  priority      Priority  @default(MEDIUM)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  assignedUsers User[]    @relation("TaskToUser")
+}
+
+model UserProjectAccess {
+  userId    Int
+  projectId Int
+  role      String?
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@id([userId, projectId])
+}
+
+model Company {
+  id              Int           @id @default(autoincrement())
+  name            String
+  accountId       Int
+  isMasterCompany Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  account         Account       @relation(fields: [accountId], references: [id])
+  projects        Project[]
+  users           UserCompany[]
+}
+
+model UserCompany {
+  userId    Int
+  companyId Int
+  role      String?
+  company   Company @relation(fields: [companyId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@id([userId, companyId])
+}
+
+enum Role {
+  ADMIN
+  BASIC
 }
 
 enum Priority {
@@ -78,50 +110,3 @@ enum Priority {
   MEDIUM
   HIGH
 }
-
-model Task {
-  id          Int       @id @default(autoincrement())
-  taskId      String    @unique
-  name        String
-  description String?
-  startDate   DateTime?
-  dueDate     DateTime?
-  priority    Priority  @default(MEDIUM)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  assignedUsers User[]
-}
-
-model UserProjectAccess {
-  user     User    @relation(fields: [userId], references: [id])
-  userId   Int
-  project  Project @relation(fields: [projectId], references: [id])
-  projectId Int
-  role     String?
-
-  @@id([userId, projectId])
-}
-
-model Company {
-  id        Int      @id @default(autoincrement())
-  name      String
-  account   Account  @relation(fields: [accountId], references: [id])
-  accountId Int
-  isMasterCompany Boolean @default(false)
-  createdAt DateTime @default(now())
-
-  users    UserCompany[]
-  projects Project[]
-}
-
-model UserCompany {
-  user     User    @relation(fields: [userId], references: [id])
-  userId   Int
-  company  Company @relation(fields: [companyId], references: [id])
-  companyId Int
-  role     String?
-
-  @@id([userId, companyId])
-}
-
