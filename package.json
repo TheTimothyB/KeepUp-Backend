@@ -39,7 +39,8 @@
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "test": "jest",
-    "create-user": "ts-node scripts/createUser.ts"
+    "create-user": "ts-node scripts/createUser.ts",
+    "postinstall": "prisma generate"
   },
   "repository": {
     "type": "git",
