@@ -21,6 +21,8 @@ if (process.env.NODE_ENV !== 'test') {
   prisma = {} as PrismaClient;
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+// Default account ID to associate with users created via /auth/register
+const DEFAULT_ACCOUNT_ID = parseInt(process.env.ACCOUNT_ID || '1', 10);
 
 // Middleware
 app.use(cors());
@@ -45,7 +47,9 @@ if (process.env.NODE_ENV !== 'test') {
       return;
     }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({ data: { username, password: hashed } });
+    const user = await prisma.user.create({
+      data: { username, password: hashed, accountId: DEFAULT_ACCOUNT_ID }
+    });
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
     res.json({ token });
   });
