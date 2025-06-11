@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import axios from 'axios';
 
 export default function Register() {
@@ -8,7 +8,9 @@ export default function Register() {
   const [password, setPassword] = useState('');
 
   const createAccount = async () => {
-    const res = await axios.post('/accounts', { name: accountName });
+    const res = await axios.post<{ id: number }>('/accounts', {
+      name: accountName,
+    });
     setAccountId(res.data.id);
   };
 
@@ -23,7 +25,9 @@ export default function Register() {
         <div>
           <input
             value={accountName}
-            onChange={(e) => setAccountName(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setAccountName(e.target.value)
+            }
             placeholder="Account name"
           />
           <button onClick={createAccount}>Create Account</button>
@@ -32,13 +36,17 @@ export default function Register() {
         <div>
           <input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setUsername(e.target.value)
+            }
             placeholder="Username"
           />
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
             placeholder="Password"
           />
           <button onClick={register}>Register</button>
